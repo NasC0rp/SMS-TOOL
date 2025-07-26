@@ -50,14 +50,20 @@ def sauvegarder_envoi(numero, message_hash):
 def envoyer_sms(numeros, message, eviter_doublons=True):
     message_hash = hasher_texte(message)
     deja_envoyes = charger_historique() if eviter_doublons else set()
-    print(f"\n{Fore.CYAN}📤 Sending SMS (simulation)...\n")
+
+    print(f"\n{Fore.CYAN}📤 Sending SMS...\n")
     for numero in set(numeros):
         identifiant = f"{numero}|{message_hash}"
         if identifiant in deja_envoyes:
             print(f"{Fore.YELLOW}⚠️ Already sent to {numero}, skipped.")
             continue
-        print(f"{Fore.GREEN}✅ SMS sent to {numero} (simulated)")
-        sauvegarder_envoi(numero, message_hash)
+
+        result = os.system(f'termux-sms-send -n "{numero}" "{message}"')
+        if result == 0:
+            print(f"{Fore.GREEN}✅ SMS sent to {numero}")
+            sauvegarder_envoi(numero, message_hash)
+        else:
+            print(f"{Fore.RED}❌ Failed to send SMS to {numero}")
         time.sleep(1)
     print(f"\n{Fore.MAGENTA}✔️ Process completed.\n")
     input(f"{Fore.CYAN}Press Enter to return to menu...")
